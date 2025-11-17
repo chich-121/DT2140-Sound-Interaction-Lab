@@ -55,7 +55,7 @@ const FLAT_THRESHOLD = 15; // Allow ±15 degrees from flat
 const MIN_TILT_ANGLE = 5; // Minimum tilt to trigger sound
 
 // Previous rotation values for detecting change
-let prevRoty = 0;
+let prevRotY = 0;
 let isPhoneFlat = false;
 
 function accelerationChange(accx, accy, accz) {
@@ -73,17 +73,17 @@ function rotationChange(rotx, roty, rotz) {
     // Check if phone is relatively flat (rotationX and rotationY are close to 0)
     // Using absolute values to check if within threshold
     const isFlatX = Math.abs(rotx) < FLAT_THRESHOLD;
-    const isFlatY = Math.abs(rotz) < FLAT_THRESHOLD;
+    const isFlatZ = Math.abs(rotz) < FLAT_THRESHOLD;
     isPhoneFlat = isFlatX && isFlatZ;
     
     // Only respond to side-to-side tilting when phone is flat
     if (isPhoneFlat) {
         // rotationZ represents roll (side-to-side tilt when flat)
         // Normalize rotationZ to 0-180 degrees range (absolute value)
-        const absRotZ = Math.abs(rotz);
+        const absRotY = Math.abs(rotz);
         
         // Only trigger if there's significant tilt
-        if (absRotZ > MIN_TILT_ANGLE) {
+        if (absRotY > MIN_TILT_ANGLE) {
             // Map rotationZ to door position parameter (0 to 0.5)
             // rotationZ typically ranges from -180 to 180 degrees
             // We'll use the absolute value and map to 0-0.5 range
@@ -111,17 +111,14 @@ function mousePressed() {
 }
 
 function deviceMoved() {
-    movetimer = millis();
-    statusLabels[2].style("color", "pink");
+   
 }
 
 function deviceTurned() {
     threshVals[1] = turnAxis;
 }
 function deviceShaken() {
-    shaketimer = millis();
-    statusLabels[0].style("color", "pink");
-    playAudio();
+    
 }
 
 function getMinMaxParam(address) {

@@ -49,7 +49,7 @@ bubble.createDSP(audioContext, 1024)
 //------------------------------------------------------------------------------------------
 //
 //==========================================================================================
-const SHAKE_THRESHOLD = 20;      // 按需要调
+const SHAKE_THRESHOLD = 10;      // 按需要调
 const BUBBLE_COOLDOWN = 120;     // 每次冒泡之间的最短间隔 (ms)
 let lastBubbleTrigger = 0;
 
@@ -66,7 +66,6 @@ function accelerationChange(accx, accy, accz) {
         triggerBubble(magnitude);
         lastBubbleTrigger = now;
     }
-    playAudio();
 }
 
 function rotationChange(rotx, roty, rotz) {
@@ -116,8 +115,8 @@ function playAudio() {
     if (audioContext.state === 'suspended') {
         return;
     }
-    dspNode.setParamValue("/englishBell/gate", 1)
-    setTimeout(() => { dspNode.setParamValue("/englishBell/gate", 0) }, 100);
+    dspNode.setParamValue("bubble", 1)
+    setTimeout(() => { dspNode.setParamValue("bubble", 0) }, 100);
 }
 
 //==========================================================================================

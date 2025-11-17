@@ -103,7 +103,7 @@ function playAudio(pressure) {
         return;
     }
     console.log(pressure)
-    dspNode.setParamValue("/brass/blower/pressure", pressure)
+    dspNode.setParamValue("bell", pressure)
 }
 
 //==========================================================================================
