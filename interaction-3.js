@@ -52,13 +52,12 @@ windchimes.createDSP(audioContext, 1024)
 //==========================================================================================
 // Movement sensitivity
 const MOVE_TRIGGER_THRESHOLD = 1.0;   // 2.0 stable
-const WIND_COOLDOWN = 100;
+const WIND_COOLDOWN = 10;
 
 let lastWindTrigger = 0;
 let lastAcc = { x: 0, y: 0, z: 0 };
 
 function accelerationChange(accx, accy, accz) {
-    if (!dspNode || audioContext.state === "suspended") return;
 
     const now = millis();
 
@@ -124,12 +123,12 @@ function playAudio() {
         return;
     }
     // Wind strength max
-    dspNode.setParamValue("/windchimes/wind_chimes/wind", 2.0);
+    dspNode.setParamValue("v:wind chimes/wind", 2.0);
 
     // Auto fade back to zero wind (calm)
     setTimeout(() => {
-        dspNode.setParamValue("/windchimes/wind_chimes/wind", 0.0);
-    }, 80);
+        dspNode.setParamValue("v:wind chimes/wind", 0.0);
+    }, 10);
 }
 
 //==========================================================================================
