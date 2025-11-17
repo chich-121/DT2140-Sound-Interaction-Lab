@@ -51,7 +51,7 @@ windchimes.createDSP(audioContext, 1024)
 //
 //==========================================================================================
 // Movement sensitivity
-const MOVE_TRIGGER_THRESHOLD = 2.0;   // 2.0 stable
+const MOVE_TRIGGER_THRESHOLD = 1.0;   // 2.0 stable
 const WIND_COOLDOWN = 100;
 
 let lastWindTrigger = 0;
@@ -71,7 +71,7 @@ function accelerationChange(accx, accy, accz) {
 
     // Only trigger if REAL movement is large enough
     if (movement > MOVE_TRIGGER_THRESHOLD && (now - lastWindTrigger > WIND_COOLDOWN)) {
-        triggerWind();
+        playAudio();
         lastWindTrigger = now;
     }
 
@@ -116,7 +116,7 @@ function getMinMaxParam(address) {
 //
 //==========================================================================================
 
-function playAudio(pressure) {
+function playAudio() {
     if (!dspNode) {
         return;
     }
@@ -129,7 +129,7 @@ function playAudio(pressure) {
     // Auto fade back to zero wind (calm)
     setTimeout(() => {
         dspNode.setParamValue("wind_chimes/wind", 0.0);
-    }, 300);
+    }, 80);
 }
 
 //==========================================================================================
