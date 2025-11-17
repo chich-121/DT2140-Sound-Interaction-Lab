@@ -55,7 +55,7 @@ const FLAT_THRESHOLD = 15; // Allow ±15 degrees from flat
 const MIN_TILT_ANGLE = 5; // Minimum tilt to trigger sound
 
 // Previous rotation values for detecting change
-let prevRotZ = 0;
+let prevRoty = 0;
 let isPhoneFlat = false;
 
 function accelerationChange(accx, accy, accz) {
@@ -73,8 +73,8 @@ function rotationChange(rotx, roty, rotz) {
     // Check if phone is relatively flat (rotationX and rotationY are close to 0)
     // Using absolute values to check if within threshold
     const isFlatX = Math.abs(rotx) < FLAT_THRESHOLD;
-    const isFlatY = Math.abs(roty) < FLAT_THRESHOLD;
-    isPhoneFlat = isFlatX && isFlatY;
+    const isFlatY = Math.abs(rotz) < FLAT_THRESHOLD;
+    isPhoneFlat = isFlatX && isFlatZ;
     
     // Only respond to side-to-side tilting when phone is flat
     if (isPhoneFlat) {
@@ -88,7 +88,7 @@ function rotationChange(rotx, roty, rotz) {
             // rotationZ typically ranges from -180 to 180 degrees
             // We'll use the absolute value and map to 0-0.5 range
             // Using a non-linear mapping for more natural feel
-            const normalizedTilt = Math.min(absRotZ / 90, 1.0); // Normalize to 0-1
+            const normalizedTilt = Math.min(absRotY / 90, 1.0); // Normalize to 0-1
             const doorPosition = normalizedTilt * 0.5; // Map to 0-0.5 range
             
             // Set the door position parameter
@@ -102,13 +102,12 @@ function rotationChange(rotx, roty, rotz) {
         dspNode.setParamValue("/door/position", 0);
     }
     
-    prevRotZ = rotz;
+    prevRotZ = roty;
 }
 
 function mousePressed() {
     playAudio(mouseX/windowWidth)
     // Use this for debugging from the desktop!
-    
 }
 
 function deviceMoved() {
