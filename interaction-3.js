@@ -50,11 +50,33 @@ windchimes.createDSP(audioContext, 1024)
 //------------------------------------------------------------------------------------------
 //
 //==========================================================================================
+// Movement sensitivity
+const MOVE_TRIGGER_THRESHOLD = 1.2;   // 你可以调：1.0 更敏感，2.0 更稳定
+const WIND_COOLDOWN = 300;
+
 let lastWindTrigger = 0;
-const WIND_COOLDOWN = 250; // so it doesn’t spam too fast
+let lastAcc = { x: 0, y: 0, z: 0 };
 
 function accelerationChange(accx, accy, accz) {
-   
+    if (!dspNode || audioContext.state === "suspended") return;
+
+    const now = millis();
+
+    // Compute true movement delta (not noise)
+    const dx = accx - lastAcc.x;
+    const dy = accy - lastAcc.y;
+    const dz = accz - lastAcc.z;
+
+    const movement = Math.sqrt(dx*dx + dy*dy + dz*dz);
+
+    // Only trigger if REAL movement is large enough
+    if (movement > MOVE_TRIGGER_THRESHOLD && (now - lastWindTrigger > WIND_COOLDOWN)) {
+        triggerWind();
+        lastWindTrigger = now;
+    }
+
+    // Save last acceleration to detect ONLY real changes
+    lastAcc = { x: accx, y: accy, z: accz };
 }
 
 function rotationChange(rotx, roty, rotz) {
@@ -68,12 +90,7 @@ function mousePressed() {
 function deviceMoved() {
     movetimer = millis();
     statusLabels[2].style("color", "pink");
-    const now = millis();
-    if (now - lastWindTrigger > WIND_COOLDOWN) {
-        triggerWind();
-        lastWindTrigger = now;
-    }
-}
+    
 
 function deviceTurned() {
     threshVals[1] = turnAxis;
