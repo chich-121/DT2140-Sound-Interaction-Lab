@@ -110,7 +110,7 @@ function playAudio() {
     dspNode.setParamValue("/bubble/drop", 1);   // 打开 gate（触发一次 bubble）
     setTimeout(() => {
       dspNode.setParamValue("/bubble/drop", 0); // 稍微延时后关掉 gate
-    }, 100);
+    }, 80);
   }
 
 //==========================================================================================
