@@ -55,7 +55,7 @@ const FLAT_THRESHOLD = 15; // Allow ±15 degrees from flat
 const MIN_TILT_ANGLE = 5; // Minimum tilt to trigger sound
 
 // Previous rotation values for detecting change
-let prevRotY = 0;
+let prevRotZ = 0;
 let isPhoneFlat = false;
 
 function accelerationChange(accx, accy, accz) {
@@ -73,22 +73,22 @@ function rotationChange(rotx, roty, rotz) {
     // Check if phone is relatively flat (rotationX and rotationY are close to 0)
     // Using absolute values to check if within threshold
     const isFlatX = Math.abs(rotx) < FLAT_THRESHOLD;
-    const isFlatZ = Math.abs(rotz) < FLAT_THRESHOLD;
-    isPhoneFlat = isFlatX && isFlatZ;
+    const isFlatY = Math.abs(roty) < FLAT_THRESHOLD;
+    isPhoneFlat = isFlatX && isFlatY;
     
     // Only respond to side-to-side tilting when phone is flat
     if (isPhoneFlat) {
         // rotationZ represents roll (side-to-side tilt when flat)
         // Normalize rotationZ to 0-180 degrees range (absolute value)
-        const absRotY = Math.abs(rotz);
+        const absRotZ = Math.abs(rotz);
         
         // Only trigger if there's significant tilt
-        if (absRotY > MIN_TILT_ANGLE) {
+        if (absRotZ > MIN_TILT_ANGLE) {
             // Map rotationZ to door position parameter (0 to 0.5)
             // rotationZ typically ranges from -180 to 180 degrees
             // We'll use the absolute value and map to 0-0.5 range
             // Using a non-linear mapping for more natural feel
-            const normalizedTilt = Math.min(absRotY / 90, 1.0); // Normalize to 0-1
+            const normalizedTilt = Math.min(absRotZ / 90, 1.0); // Normalize to 0-1
             const doorPosition = normalizedTilt * 0.5; // Map to 0-0.5 range
             
             // Set the door position parameter
@@ -102,23 +102,25 @@ function rotationChange(rotx, roty, rotz) {
         dspNode.setParamValue("/door/position", 0);
     }
     
-    prevRotZ = roty;
+    prevRotZ = rotz;
 }
 
 function mousePressed() {
     playAudio(mouseX/windowWidth)
     // Use this for debugging from the desktop!
+    
 }
 
 function deviceMoved() {
-   
+    movetimer = millis();
+    statusLabels[2].style("color", "pink");
 }
 
 function deviceTurned() {
     threshVals[1] = turnAxis;
 }
 function deviceShaken() {
-    
+
 }
 
 function getMinMaxParam(address) {
@@ -139,7 +141,7 @@ function getMinMaxParam(address) {
 //
 //==========================================================================================
 
-/*function playAudio() {
+function playAudio() {
     if (!dspNode) {
         return;
     }
@@ -150,10 +152,10 @@ function getMinMaxParam(address) {
     // them printed on the console of your browser when you load the page)
     // For example if you change to a bell sound, here you could use "/churchBell/gate" instead of
     // "/thunder/rumble".
-    dspNode.setParamValue("/thunder/rumble", 1)
-    setTimeout(() => { dspNode.setParamValue("/thunder/rumble", 0) }, 100);
+    dspNode.setParamValue("/door/position", 0.5)
+    setTimeout(() => { dspNode.setParamValue("door", 0) }, 100);
 }
-*/
+
 //==========================================================================================
 // END
 //==========================================================================================

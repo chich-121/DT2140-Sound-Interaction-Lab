@@ -77,17 +77,13 @@ function mousePressed() {
 }
 
 function deviceMoved() {
-    movetimer = millis();
-    statusLabels[2].style("color", "pink");
+    
 }
 
 function deviceTurned() {
-    threshVals[1] = turnAxis;
 }
 function deviceShaken() {
-    shaketimer = millis();
-    statusLabels[0].style("color", "pink");
-    playAudio();
+    
 }
 
 function getMinMaxParam(address) {
@@ -108,15 +104,18 @@ function getMinMaxParam(address) {
 //
 //==========================================================================================
 
-function playAudio() {
-    if (!dspNode) {
-        return;
-    }
-    if (audioContext.state === 'suspended') {
-        return;
-    }
-    dspNode.setParamValue("bubble", 1)
-    setTimeout(() => { dspNode.setParamValue("bubble", 0) }, 100);
+function triggerBubble(force) {
+    const freqMin = 200;
+    const freqMax = 1500;
+    const normalized = Math.min((force - SHAKE_THRESHOLD) / 40, 1);
+    const freq = freqMin + (freqMax - freqMin) * normalized;
+
+    dspNode.setParamValue("/bubble/freq", freq);
+    dspNode.setParamValue("/bubble/volume", 0.8);
+
+    // 触发泡泡按钮（Faust 中 button("drop")）
+    dspNode.setParamValue("/bubble/drop", 1);
+    setTimeout(() => dspNode.setParamValue("/bubble/drop", 0), 30);
 }
 
 //==========================================================================================
