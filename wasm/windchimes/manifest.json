@@ -1,0 +1,17 @@
+{
+  "name": "Faust windchimes",
+  "short_name": "windchimes",
+  "start_url": "./index.html",
+  "description": "Progressive Web App for windchimes",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icon.png",
+      "sizes": "390x390",
+      "type": "image/png"
+    }
+  ]
+}

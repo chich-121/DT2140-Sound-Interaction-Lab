@@ -51,58 +51,57 @@ door.createDSP(audioContext, 1024)
 //
 //==========================================================================================
 // Thresholds for detecting if phone is flat (in degrees)
-const FLAT_THRESHOLD = 15; // Allow ±15 degrees from flat
-const MIN_TILT_ANGLE = 5; // Minimum tilt to trigger sound
+const DOOR_PARAM_ADDRESS = "/door/open"; // Allow ±15 degrees from flat
+const DOOR_MIN_ANGLE = 0;    // door close
+const DOOR_MAX_ANGLE = 90;   // door open
 
-// Previous rotation values for detecting change
-let prevRotZ = 0;
-let isPhoneFlat = false;
+// 从 DSP 里读到的参数实际 min / max
+let doorParamMin = 0;
+let doorParamMax = 1;
+let doorParamReady = false;
 
 function accelerationChange(accx, accy, accz) {
     // playAudio()
 }
 
 function rotationChange(rotx, roty, rotz) {
-    if (!dspNode) {
-        return;
-    }
-    if (audioContext.state === 'suspended') {
-        return;
-    }
-    
-    // Check if phone is relatively flat (rotationX and rotationY are close to 0)
-    // Using absolute values to check if within threshold
-    const isFlatX = Math.abs(rotx) < FLAT_THRESHOLD;
-    const isFlatY = Math.abs(roty) < FLAT_THRESHOLD;
-    isPhoneFlat = isFlatX && isFlatY;
-    
-    // Only respond to side-to-side tilting when phone is flat
-    if (isPhoneFlat) {
-        // rotationZ represents roll (side-to-side tilt when flat)
-        // Normalize rotationZ to 0-180 degrees range (absolute value)
-        const absRotZ = Math.abs(rotz);
-        
-        // Only trigger if there's significant tilt
-        if (absRotZ > MIN_TILT_ANGLE) {
-            // Map rotationZ to door position parameter (0 to 0.5)
-            // rotationZ typically ranges from -180 to 180 degrees
-            // We'll use the absolute value and map to 0-0.5 range
-            // Using a non-linear mapping for more natural feel
-            const normalizedTilt = Math.min(absRotZ / 90, 1.0); // Normalize to 0-1
-            const doorPosition = normalizedTilt * 0.5; // Map to 0-0.5 range
-            
-            // Set the door position parameter
-            dspNode.setParamValue("/door/position", doorPosition);
-        } else {
-            // Reset to minimum when not tilted
-            dspNode.setParamValue("/door/position", 0);
-        }
+    if (!dspNode) return;
+  if (audioContext.state === 'suspended') return;
+
+  // 第一次有 dspNodeParams 时，从 JSON 里把这个参数的 min/max 读出来
+  if (!doorParamReady && dspNodeParams) {
+    const paramDef = findByAddress(dspNodeParams, DOOR_PARAM_ADDRESS);
+    if (paramDef) {
+      const [minVal, maxVal] = getParamMinMax(paramDef);
+      doorParamMin = minVal;
+      doorParamMax = maxVal;
+      console.log("Door param range:", doorParamMin, doorParamMax);
+      doorParamReady = true;
     } else {
-        // Phone is not flat, reset door position
-        dspNode.setParamValue("/door/position", 0);
+      // 没找到的话在 console 里打个 log 提醒你检查地址
+      console.warn("Door param not found, check DOOR_PARAM_ADDRESS:", DOOR_PARAM_ADDRESS);
+      return;
     }
+}
+
+    if (!doorParamReady) return;
+  
+    // 把 rotationY 限制在 [DOOR_MIN_ANGLE, DOOR_MAX_ANGLE] 范围内
+    const angleClamped = clamp(roty, DOOR_MIN_ANGLE, DOOR_MAX_ANGLE);
+  
+    // 映射到 0–1
+    let t = (angleClamped - DOOR_MIN_ANGLE) / (DOOR_MAX_ANGLE - DOOR_MIN_ANGLE);
+    t = clamp(t, 0, 1);
+  
+    // 可以稍微做一点非线性映射，让开门前半段细腻一点
+    t = Math.pow(t, 1.2);
+  
+    // 再把 0–1 映射到实际参数范围
+    const doorValue = doorParamMin + t * (doorParamMax - doorParamMin);
+  
+    // 把当前“门角度”发给 Faust
+    dspNode.setParamValue(DOOR_PARAM_ADDRESS, doorValue);
     
-    prevRotZ = rotz;
 }
 
 function mousePressed() {
@@ -152,8 +151,7 @@ function playAudio() {
     // them printed on the console of your browser when you load the page)
     // For example if you change to a bell sound, here you could use "/churchBell/gate" instead of
     // "/thunder/rumble".
-    dspNode.setParamValue("/door/position", 0.5)
-    setTimeout(() => { dspNode.setParamValue("door", 0) }, 100);
+    
 }
 
 //==========================================================================================
