@@ -12,7 +12,7 @@ let dspNodeParams = null;
 let jsonParams = null;
 
 // Change here to ("tuono") depending on your wasm file name
-const dspName = "bell";
+const dspName = "windchimes";
 const instance = new FaustWasm2ScriptProcessor(dspName);
 
 // output to window or npm package module
@@ -25,11 +25,11 @@ if (typeof module === "undefined") {
 }
 
 // The name should be the same as the WASM file, so change tuono with brass if you use brass.wasm
-bell.createDSP(audioContext, 1024)
+windchimes.createDSP(audioContext, 1024)
     .then(node => {
         dspNode = node;
         dspNode.connect(audioContext.destination);
-        console.log('params: ', dspNode.getParams());
+        console.log('windchimes: ', dspNode.getParams());
         const jsonString = dspNode.getJSON();
         jsonParams = JSON.parse(jsonString)["ui"][0]["items"];
         dspNodeParams = jsonParams
@@ -50,9 +50,11 @@ bell.createDSP(audioContext, 1024)
 //------------------------------------------------------------------------------------------
 //
 //==========================================================================================
+let lastWindTrigger = 0;
+const WIND_COOLDOWN = 250; // so it doesn’t spam too fast
 
 function accelerationChange(accx, accy, accz) {
-    // playAudio()
+   
 }
 
 function rotationChange(rotx, roty, rotz) {
@@ -66,15 +68,18 @@ function mousePressed() {
 function deviceMoved() {
     movetimer = millis();
     statusLabels[2].style("color", "pink");
+    const now = millis();
+    if (now - lastWindTrigger > WIND_COOLDOWN) {
+        triggerWind();
+        lastWindTrigger = now;
+    }
 }
 
 function deviceTurned() {
     threshVals[1] = turnAxis;
 }
 function deviceShaken() {
-    shaketimer = millis();
-    statusLabels[0].style("color", "pink");
-    playAudio();
+    
 }
 
 function getMinMaxParam(address) {
@@ -102,8 +107,13 @@ function playAudio(pressure) {
     if (audioContext.state === 'suspended') {
         return;
     }
-    console.log(pressure)
-    dspNode.setParamValue("bell", pressure)
+    // Wind strength max
+    dspNode.setParamValue("v:wind chimes/wind", 2.0);
+
+    // Auto fade back to zero wind (calm)
+    setTimeout(() => {
+        dspNode.setParamValue("v:wind chimes/wind", 0.0);
+    }, 300);
 }
 
 //==========================================================================================
