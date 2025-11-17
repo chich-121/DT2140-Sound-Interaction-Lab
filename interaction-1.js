@@ -106,13 +106,8 @@ function rotationChange(rotx, roty, rotz) {
 }
 
 function mousePressed() {
-    // For desktop debugging - simulate tilt
-    if (!dspNode) {
-        return;
-    }
-    // Map mouse X position to door position
-    const doorPosition = (mouseX / windowWidth) * 0.5;
-    dspNode.setParamValue("/door/position", doorPosition);
+    playAudio(mouseX/windowWidth)
+    // Use this for debugging from the desktop!
     
 }
 
