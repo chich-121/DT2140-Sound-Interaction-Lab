@@ -124,11 +124,11 @@ function playAudio() {
         return;
     }
     // Wind strength max
-    dspNode.setParamValue("wind_chimes/wind", 2.0);
+    dspNode.setParamValue("/windchimes/wind_chimes/wind", 2.0);
 
     // Auto fade back to zero wind (calm)
     setTimeout(() => {
-        dspNode.setParamValue("wind_chimes/wind", 0.0);
+        dspNode.setParamValue("/windchimes/wind_chimes/wind", 0.0);
     }, 80);
 }
 
