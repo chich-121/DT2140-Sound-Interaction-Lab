@@ -66,6 +66,7 @@ function accelerationChange(accx, accy, accz) {
         triggerBubble(magnitude);
         lastBubbleTrigger = now;
     }
+    playAudio();
 }
 
 function rotationChange(rotx, roty, rotz) {
