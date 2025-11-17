@@ -103,13 +103,13 @@ function playAudio() {
     if (audioContext.state === 'suspended') return;
     const now = millis();
     if (now - lastBubbleTime < BUBBLE_COOLDOWN) {
-      return; // 冷却中，不再触发
+      return; 
     }
     lastBubbleTime = now;
   
-    dspNode.setParamValue("/bubble/drop", 1);   // 打开 gate（触发一次 bubble）
+    dspNode.setParamValue("/bubble/drop", 1);   // trigger once
     setTimeout(() => {
-      dspNode.setParamValue("/bubble/drop", 0); // 稍微延时后关掉 gate
+      dspNode.setParamValue("/bubble/drop", 0); // trigger after a while
     }, 80);
   }
 

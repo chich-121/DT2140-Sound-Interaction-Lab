@@ -51,8 +51,8 @@ windchimes.createDSP(audioContext, 1024)
 //
 //==========================================================================================
 // Movement sensitivity
-const MOVE_TRIGGER_THRESHOLD = 1.2;   // 你可以调：1.0 更敏感，2.0 更稳定
-const WIND_COOLDOWN = 300;
+const MOVE_TRIGGER_THRESHOLD = 2.0;   // 2.0 stable
+const WIND_COOLDOWN = 100;
 
 let lastWindTrigger = 0;
 let lastAcc = { x: 0, y: 0, z: 0 };
@@ -83,7 +83,6 @@ function rotationChange(rotx, roty, rotz) {
 }
 
 function mousePressed() {
-    playAudio(mouseX/windowWidth)
     // Use this for debugging from the desktop!
 }
 
@@ -125,11 +124,11 @@ function playAudio(pressure) {
         return;
     }
     // Wind strength max
-    dspNode.setParamValue("v:wind chimes/wind", 2.0);
+    dspNode.setParamValue("wind_chimes/wind", 2.0);
 
     // Auto fade back to zero wind (calm)
     setTimeout(() => {
-        dspNode.setParamValue("v:wind chimes/wind", 0.0);
+        dspNode.setParamValue("wind_chimes/wind", 0.0);
     }, 300);
 }
 
