@@ -49,23 +49,11 @@ bubble.createDSP(audioContext, 1024)
 //------------------------------------------------------------------------------------------
 //
 //==========================================================================================
-const SHAKE_THRESHOLD = 10;      // 按需要调
-const BUBBLE_COOLDOWN = 120;     // 每次冒泡之间的最短间隔 (ms)
-let lastBubbleTrigger = 0;
+const BUBBLE_COOLDOWN = 150; // ms
+let lastBubbleTime = 0;
 
 function accelerationChange(accx, accy, accz) {
-    // playAudio()
-    if (!dspNode || audioContext.state === "suspended") {
-        return;
-    }
-
-    const now = millis();
-    const magnitude = Math.sqrt(accx * accx + accy * accy + accz * accz);
-
-    if (magnitude > SHAKE_THRESHOLD && (now - lastBubbleTrigger) > BUBBLE_COOLDOWN) {
-        triggerBubble(magnitude);
-        lastBubbleTrigger = now;
-    }
+    
 }
 
 function rotationChange(rotx, roty, rotz) {
@@ -77,14 +65,20 @@ function mousePressed() {
 }
 
 function deviceMoved() {
-    
-}
-
-function deviceTurned() {
-}
-function deviceShaken() {
-    
-}
+    movetimer = millis();
+    statusLabels[2].style("color", "pink");
+  }
+  
+  function deviceTurned() {
+    threshVals[1] = turnAxis;
+  }
+  
+  // shake and bubble
+  function deviceShaken() {
+    shaketimer = millis();
+    statusLabels[0].style("color", "pink");
+    playAudio();  
+  }
 
 function getMinMaxParam(address) {
     const exampleMinMaxParam = findByAddress(dspNodeParams, address);
@@ -104,19 +98,21 @@ function getMinMaxParam(address) {
 //
 //==========================================================================================
 
-function triggerBubble(force) {
-    const freqMin = 200;
-    const freqMax = 1500;
-    const normalized = Math.min((force - SHAKE_THRESHOLD) / 40, 1);
-    const freq = freqMin + (freqMax - freqMin) * normalized;
-
-    dspNode.setParamValue("/bubble/freq", freq);
-    dspNode.setParamValue("/bubble/volume", 0.8);
-
-    // 触发泡泡按钮（Faust 中 button("drop")）
-    dspNode.setParamValue("/bubble/drop", 1);
-    setTimeout(() => dspNode.setParamValue("/bubble/drop", 0), 30);
-}
+function playAudio() {
+    if (!dspNode) return;
+    if (audioContext.state === 'suspended') return;
+  
+    const now = millis();
+    if (now - lastBubbleTime < BUBBLE_COOLDOWN) {
+      return; // 冷却中，不再触发
+    }
+    lastBubbleTime = now;
+  
+    dspNode.setParamValue("/bubble/gate", 1);   // 打开 gate（触发一次 bubble）
+    setTimeout(() => {
+      dspNode.setParamValue("/bubble/gate", 0); // 稍微延时后关掉 gate
+    }, 80);
+  }
 
 //==========================================================================================
 // END
