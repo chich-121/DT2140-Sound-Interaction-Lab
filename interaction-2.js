@@ -107,14 +107,14 @@ function playAudio() {
     }
     const now = millis();
     if (now - lastBubbleTime < BUBBLE_COOLDOWN) {
-      return; // no trigger
+      return; // 冷却中，不再触发
     }
     lastBubbleTime = now;
   
     dspNode.setParamValue("/bubble/gate", 1);   // 打开 gate（触发一次 bubble）
     setTimeout(() => {
       dspNode.setParamValue("/bubble/gate", 0); // 稍微延时后关掉 gate
-    }, 80);
+    }, 1000);
   }
 
 //==========================================================================================
