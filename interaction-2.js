@@ -99,12 +99,8 @@ function getMinMaxParam(address) {
 //==========================================================================================
 
 function playAudio() {
-    if (!dspNode) {
-        return;
-    }
-    if (audioContext.state === 'suspended') {
-        return;
-    }
+    if (!dspNode) return;
+    if (audioContext.state === 'suspended') return;
     const now = millis();
     if (now - lastBubbleTime < BUBBLE_COOLDOWN) {
       return; // 冷却中，不再触发
