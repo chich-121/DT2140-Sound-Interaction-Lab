@@ -111,10 +111,10 @@ function playAudio() {
     }
     lastBubbleTime = now;
   
-    dspNode.setParamValue("/bubble/gate", 1);   // 打开 gate（触发一次 bubble）
+    dspNode.setParamValue("/bubble/drop", 1);   // 打开 gate（触发一次 bubble）
     setTimeout(() => {
-      dspNode.setParamValue("/bubble/gate", 0); // 稍微延时后关掉 gate
-    }, 1000);
+      dspNode.setParamValue("/bubble/drop", 0); // 稍微延时后关掉 gate
+    }, 100);
   }
 
 //==========================================================================================
