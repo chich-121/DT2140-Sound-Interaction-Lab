@@ -51,14 +51,16 @@ windchimes.createDSP(audioContext, 1024)
 //
 //==========================================================================================
 // Movement sensitivity
-const MOVE_TRIGGER_THRESHOLD = 1.0;   // 2.0 stable
-const WIND_COOLDOWN = 10;
+const MOVE_TRIGGER_THRESHOLD = 1.0;   // slight wind
+const GUST_THRESHOLD = 2.0;//medium wind
+const STORM_THRESHOLD  = 4.0;//strong wind
+const WIND_COOLDOWN = 200;//time between
+
 
 let lastWindTrigger = 0;
 let lastAcc = { x: 0, y: 0, z: 0 };
 
 function accelerationChange(accx, accy, accz) {
-    if (!dspNode || audioContext.state === "suspended") return;
     const now = millis();
     //initialize
     if (!lastAcc) {
@@ -71,15 +73,18 @@ function accelerationChange(accx, accy, accz) {
     const dz = accz - lastAcc.z;
 
     const movement = Math.sqrt(dx*dx + dy*dy + dz*dz);
+    lastAcc = { x: accx, y: accy, z: accz };
+
+    //cool down time
+    if (now - lastWindTrigger < WIND_COOLDOWN) return;
 
     // Only trigger if REAL movement is large enough
-    if (movement > MOVE_TRIGGER_THRESHOLD && (now - lastWindTrigger > WIND_COOLDOWN)) {
-        playAudio();
+    if (movement > MOVE_TRIGGER_THRESHOLD) {
+        playAudio(movement);
         lastWindTrigger = now;
     }
 
     // Save last acceleration to detect ONLY real changes
-    lastAcc = { x: accx, y: accy, z: accz };
 
 }
 
@@ -126,13 +131,27 @@ function playAudio() {
     if (audioContext.state === 'suspended') {
         return;
     }
+
+    let windValue;
+    let duration;
+
+    if(movement >= STORM_THRESHOLD){
+        windValue = 2.0;
+        duration = 1500;
+    }else if(movement >= GUST_THRESHOLD){
+        windValue = 1.0;
+        duration = 700;
+    }else {
+        windValue = 0.4;
+        duration = 300;
+    }
     // Wind strength max
-    dspNode.setParamValue("v:wind chimes/wind", 2.0);
+    dspNode.setParamValue("v:wind chimes/wind", windValue);
 
     // Auto fade back to zero wind (calm)
     setTimeout(() => {
         dspNode.setParamValue("v:wind chimes/wind", 0.0);
-    }, 150);
+    }, duration);
 }
 
 //==========================================================================================
