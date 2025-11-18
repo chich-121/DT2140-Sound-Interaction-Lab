@@ -58,9 +58,13 @@ let lastWindTrigger = 0;
 let lastAcc = { x: 0, y: 0, z: 0 };
 
 function accelerationChange(accx, accy, accz) {
-
+    if (!dspNode || audioContext.state === "suspended") return;
     const now = millis();
-
+    //initialize
+    if (!lastAcc) {
+        lastAcc = { x: accx, y: accy, z: accz };
+        return;
+      }
     // Compute true movement delta (not noise)
     const dx = accx - lastAcc.x;
     const dy = accy - lastAcc.y;
@@ -76,6 +80,7 @@ function accelerationChange(accx, accy, accz) {
 
     // Save last acceleration to detect ONLY real changes
     lastAcc = { x: accx, y: accy, z: accz };
+
 }
 
 function rotationChange(rotx, roty, rotz) {
@@ -86,8 +91,7 @@ function mousePressed() {
 }
 
 function deviceMoved() {
-    movetimer = millis();
-    statusLabels[2].style("color", "pink");
+    
 }
 
 function deviceTurned() {
@@ -128,7 +132,7 @@ function playAudio() {
     // Auto fade back to zero wind (calm)
     setTimeout(() => {
         dspNode.setParamValue("v:wind chimes/wind", 0.0);
-    }, 10);
+    }, 150);
 }
 
 //==========================================================================================
