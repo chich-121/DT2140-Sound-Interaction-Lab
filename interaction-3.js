@@ -54,7 +54,7 @@ windchimes.createDSP(audioContext, 1024)
 const MOVE_TRIGGER_THRESHOLD = 1.0;   // slight wind
 const GUST_THRESHOLD = 2.0;//medium wind
 const STORM_THRESHOLD  = 4.0;//strong wind
-const WIND_COOLDOWN = 200;//time between
+const WIND_COOLDOWN = 10;//time between
 
 
 let lastWindTrigger = 0;
@@ -137,13 +137,13 @@ function playAudio() {
 
     if(movement >= STORM_THRESHOLD){
         windValue = 2.0;
-        duration = 1500;
+        duration = 2000;
     }else if(movement >= GUST_THRESHOLD){
         windValue = 1.0;
-        duration = 700;
+        duration = 1000;
     }else {
         windValue = 0.4;
-        duration = 300;
+        duration = 500;
     }
     // Wind strength max
     dspNode.setParamValue("v:wind chimes/wind", windValue);
