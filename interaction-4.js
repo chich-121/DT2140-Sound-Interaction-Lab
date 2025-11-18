@@ -11,13 +11,11 @@ let dspNode = null;
 let dspNodeParams = null;
 let jsonParams = null;
 
-
-let lastmovetime = false;
-let thunderArmed = false;
+let bellArmed = false;
 
 
 // Change here to ("tuono") depending on your wasm file name
-const dspName = "thunder";
+const dspName = "scifi";
 const instance = new FaustWasm2ScriptProcessor(dspName);
 
 // output to window or npm package module
@@ -30,7 +28,7 @@ if (typeof module === "undefined") {
 }
 
 // The name should be the same as the WASM file, so change tuono with brass if you use brass.wasm
-thunder.createDSP(audioContext, 1024)
+scifi.createDSP(audioContext, 1024)
     .then(node => {
         dspNode = node;
         dspNode.connect(audioContext.destination);
@@ -57,36 +55,38 @@ thunder.createDSP(audioContext, 1024)
 //==========================================================================================
 
 function accelerationChange(accx, accy, accz) {
-    const magnitude = Math.sqrt(accx * accx + accy * accy + accz * accz);
-    const bigMoveThreshold = 900;  // adjustable
-    const isBigMove = magnitude > bigMoveThreshold;
-    const now = millis();
-    const recentlyMoved = (now - lastmovetime) < 200; //moved within last 
 
-    if (isBigMove && recentlyMoved && thunderArmed) {
-        playAudio();
-        thunderArmed = false;
-    }
-
-    if (!isBigMove && !thunderArmed) {
-        thunderArmed = true;
-    }
-  
-
+    // playAudio()
 }
 
 function rotationChange(rotx, roty, rotz) {
+    const heading = rotz;    // current
+    const target = 45;      //360-45 
+    const tolerance = 25;    // error +-25
+
+    const isNorthEast = Math.abs(heading - target) < tolerance;
+
+    //trigger only when entering direction
+    if (isNorthEast && !bellArmed) {
+        playAudio();      
+        bellArmed = true; // lock
+    }
+
+    // unlock when leaving north east area
+    if (!isNorthEast && bellArmed) {
+        bellArmed = false;
+    }
 }
 
 function mousePressed() {
-    // playAudio()
+    playAudio()
     // Use this for debugging from the desktop!
 }
 
-function deviceMoved() {
-    lastmovetime = millis();
-    statusLabels[2].style("color", "pink");
-}
+// function deviceMoved() {
+//     lastmovetime = millis();
+//     statusLabels[2].style("color", "pink");
+// }
 
 function deviceTurned() {
     threshVals[1] = turnAxis;
@@ -122,8 +122,14 @@ function playAudio() {
     if (audioContext.state === 'suspended') {
         return;
     }
-    dspNode.setParamValue("/thunder/rumble", 1)
-    setTimeout(() => { dspNode.setParamValue("/thunder/rumble", 0) }, 200);
+    // Edit here the addresses ("/thunder/rumble") depending on your WASM controls (you can see 
+    // them printed on the console of your browser when you load the page)
+    // For example if you change to a bell sound, here you could use "/churchBell/gate" instead of
+    // "/thunder/rumble".
+    dspNode.setParamValue("/scifi/volume", 0.8);   // 声音大小
+    dspNode.setParamValue("/scifi/Freq", 800);     // 声音频率，大约 800Hz
+    dspNode.setParamValue("/scifi/trigger", 1)
+    setTimeout(() => { dspNode.setParamValue("/scifi/trigger", 0) }, 200);
 }
 
 //==========================================================================================
